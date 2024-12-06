@@ -149,11 +149,6 @@ class WaterlensHtmlConverter < Asciidoctor::Converter::Base
         details << %(<span id="email#{idx > 1 ? idx : ''}" class="email">#{node.sub_macros author.email}</span>#{br}) if author.email
         idx += 1
       end
-      unless details.empty?
-        result << '<details>'
-        result.concat details
-        result << '</details>'
-      end
       if node.attr? 'shownav'
         case node.attr 'lang'
         when 'zh-hans'
