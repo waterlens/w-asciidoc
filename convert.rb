@@ -58,7 +58,7 @@ class WaterlensHtmlConverter < Asciidoctor::Converter::Base
       <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;display=swap" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&amp;display=swap" rel="stylesheet">
       <link href="https://cdn.jsdelivr.net/npm/hack-font@3/build/web/hack.css" rel="stylesheet">
-      <link rel="stylesheet" href="./style.css">
+      <link rel="stylesheet" href="/style.css">
     EOS
     if node.attr? 'stem'
       result << <<~EOS.chomp
