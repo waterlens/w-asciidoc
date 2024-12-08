@@ -198,7 +198,7 @@ class WaterlensHtmlConverter < Asciidoctor::Converter::Base
         result << <<~EOS.chomp
         <footer>
           <p>
-            <a property="dct:title" rel="cc:attributionURL" href="/">本站</a>
+            <a property="dct:title" rel="cc:attributionURL" href="/zh/index.html">本站</a>
             由 <span property="cc:attributionName">Waterlens</span>
             创作的一切内容 © 2021 - #{Time.now.year} 在
             <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">
