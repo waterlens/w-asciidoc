@@ -650,22 +650,27 @@ Your browser does not support the audio tag.
   end
 
   def convert_paragraph node
-    if node.role
-      attributes = %(#{node.id ? %[ id="#{node.id}"] : ''} class="paragraph #{node.role}")
-    elsif node.id
-      attributes = %( id="#{node.id}" class="paragraph")
-    else
-      attributes = ' class="paragraph"'
-    end
     if node.title?
+      if node.role
+        attributes = %(#{node.id ? %[ id="#{node.id}"] : ''} class="paragraph #{node.role}")
+      elsif node.id
+        attributes = %( id="#{node.id}" class="paragraph")
+      else
+        attributes = ' class="paragraph"'
+      end
       %(<div#{attributes}>
 <div class="title">#{node.title}</div>
 <p>#{node.content}</p>
 </div>)
     else
-      %(<div#{attributes}>
-<p>#{node.content}</p>
-</div>)
+      if node.role
+        attributes = %(#{node.id ? %[ id="#{node.id}"] : ''} class="paragraph #{node.role}")
+      elsif node.id
+        attributes = %( id="#{node.id}")
+      else
+        attributes = ''
+      end
+      %(<p#{attributes}>#{node.content}</p>)
     end
   end
 
