@@ -578,7 +578,7 @@ Your browser does not support the audio tag.
   def convert_stem node
     id_attribute = node.id ? %( id="#{node.id}") : ''
     title_element = node.title? ? %(<div class="title">#{node.title}</div>\n) : ''
-    open, close = BLOCK_MATH_DELIMITERS[style = node.style.to_sym]
+    open, close = Asciidoctor::BLOCK_MATH_DELIMITERS[style = node.style.to_sym]
     if (equation = node.content)
       if style == :asciimath && (equation.include? LF)
         br = %(#{LF}<br>)
