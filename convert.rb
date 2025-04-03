@@ -215,7 +215,7 @@ class WaterlensHtmlConverter < Asciidoctor::Converter::Base
         <footer>
           <p>
             The content on <a property="dct:title" rel="cc:attributionURL" href="/">this website</a>
-            © 2021 - 2024 by <span property="cc:attributionName">Waterlens</span>
+            © 2021 - #{Time.now.year} by <span property="cc:attributionName">Waterlens</span>
             is licensed under 
             <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">
                 CC BY-SA 4.0 <img alt="" style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1">
