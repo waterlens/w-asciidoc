@@ -160,6 +160,7 @@ class WaterlensHtmlConverter < Asciidoctor::Converter::Base
             <nav>
               <a href="/zh/index.html">主页</a>
               <a href="/zh/posts.html">文章</a>
+              <a href="/zh/projects.html">项目</a>
               <a href="/zh/about.html">关于</a>
               <a href="/index.html">English</a>
               <a href="https://github.com/waterlens">Github</a>
@@ -170,6 +171,7 @@ class WaterlensHtmlConverter < Asciidoctor::Converter::Base
             <nav>
               <a href="/index.html">Home</a>
               <a href="/posts.html">Posts</a>
+              <a href="/projects.html">Projects</a>
               <a href="/about.html">About</a>
               <a href="/zh/index.html">中文</a>
               <a href="https://github.com/waterlens">Github</a>
