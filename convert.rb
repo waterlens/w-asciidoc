@@ -33,11 +33,12 @@ class WaterlensHtmlConverter < Asciidoctor::Converter::Base
 
   def initialize backend, opts = {}
     @backend = backend
-    init_backend_traits filetype: 'w-html', outfilesuffix: '.html', supports_templates: true
+    init_backend_traits basebackend: 'html', filetype: 'w-html', outfilesuffix: '.html', supports_templates: true
   end
   
   def convert_document node
     br = %(<br>)
+    slash = ''
 
     unless (asset_uri_scheme = (node.attr 'asset-uri-scheme', 'https')).empty?
       asset_uri_scheme = %(#{asset_uri_scheme}:)
