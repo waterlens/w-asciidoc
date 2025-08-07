@@ -6,5 +6,5 @@ task :gen, [:input, :output] do |t, args|
     puts "Usage: rake gen[input.adoc, output.html]"
     exit
   end
-  sh "asciidoctor -b w-html -r ./convert.rb #{input} -o #{output}"
+  sh "asciidoctor -b w-html -r ./convert.rb  -r ./hljs.rb #{input} -o #{output}"
 end
