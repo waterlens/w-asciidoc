@@ -4,6 +4,8 @@ VERSION = '0.1.0'
 class WaterlensHtmlConverter < Asciidoctor::Converter::Base
   register_for 'w-html'
   
+  CJK_RE = '[\u2e80-\u9fff\uf900-\ufaff\ufe30-\ufe4f\uff01-\uff60]'
+
   (QUOTE_TAGS = {
     monospaced: ['<code>', '</code>', true],
     emphasis: ['<em>', '</em>', true],
@@ -56,7 +58,6 @@ class WaterlensHtmlConverter < Asciidoctor::Converter::Base
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
       <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@400;700&amp;display=swap" rel="stylesheet">
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;display=swap" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&amp;display=swap" rel="stylesheet">
       <link href="https://cdn.jsdelivr.net/npm/hack-font@3/build/web/hack.css" rel="stylesheet">
       <link rel="stylesheet" href="/style.css">
@@ -403,10 +404,10 @@ Your browser does not support the audio tag.
       node.items.each do |terms, dd|
         result << '<li>'
         terms.each do |dt|
-          result << %(<p><em>#{dt.text}</em></p>)
+          result << %(<p><em>#{collapse_cjk_newlines(dt.text)}</em></p>)
         end
         if dd
-          result << %(<p>#{dd.text}</p>) if dd.text?
+          result << %(<p>#{collapse_cjk_newlines(dd.text)}</p>) if dd.text?
           result << dd.content if dd.blocks?
         end
         result << '</li>'
@@ -502,32 +503,34 @@ Your browser does not support the audio tag.
 
   def convert_image node
     target = node.attr 'target'
-    width_attr = ''
+    html_attrs = ''
+    styles = []
     if (node.attr? 'width')
       if ((node.attr 'width').end_with? 'rem')
-        width_attr = %( style="width: #{node.attr 'width'};")
+        styles << %(width: #{node.attr 'width'};)
       else
-        width_attr = %( width="#{node.attr 'width'}")
+        html_attrs += %( width="#{node.attr 'width'}")
       end
     end
     if (node.attr? 'height')
       if ((node.attr 'height').end_with? 'rem')
-        height_attr = %( style="height: #{node.attr 'height'};")
+        styles << %(height: #{node.attr 'height'};)
       else
-        height_attr = %( height="#{node.attr 'height'}")
+        html_attrs += %( height="#{node.attr 'height'}")
       end
     end
+    html_attrs += %( style="#{styles.join ' '}") unless styles.empty?
     if ((node.attr? 'format', 'svg') || (target.include? '.svg'))
       if node.option? 'inline'
         img = (read_svg_contents node, target) || %(<span class="alt">#{node.alt}</span>)
       elsif node.option? 'interactive'
-        fallback = (node.attr? 'fallback') ? %(<img src="#{node.image_uri node.attr 'fallback'}" alt="#{encode_attribute_value node.alt}"#{width_attr}#{height_attr}>) : %(<span class="alt">#{node.alt}</span>)
-        img = %(<object type="image/svg+xml" data="#{node.image_uri target}"#{width_attr}#{height_attr}>#{fallback}</object>)
+        fallback = (node.attr? 'fallback') ? %(<img src="#{node.image_uri node.attr 'fallback'}" alt="#{encode_attribute_value node.alt}"#{html_attrs}>) : %(<span class="alt">#{node.alt}</span>)
+        img = %(<object type="image/svg+xml" data="#{node.image_uri target}"#{html_attrs}>#{fallback}</object>)
       else
-        img = %(<img src="#{node.image_uri target}" alt="#{encode_attribute_value node.alt}"#{width_attr}#{height_attr}>)
+        img = %(<img src="#{node.image_uri target}" alt="#{encode_attribute_value node.alt}"#{html_attrs}>)
       end
     else
-      img = %(<img src="#{node.image_uri target}" alt="#{encode_attribute_value node.alt}"#{width_attr}#{height_attr}>)
+      img = %(<img src="#{node.image_uri target}" alt="#{encode_attribute_value node.alt}"#{html_attrs}>)
     end
     img = %(<a class="image" href="#{node.attr 'link'}"#{(append_link_constraint_attrs node).join}>#{img}</a>) if node.attr? 'link'
     id_attr = node.id ? %( id="#{node.id}") : ''
@@ -627,7 +630,7 @@ Your browser does not support the audio tag.
       else
         result << '<li>'
       end
-      result << %(<p>#{item.text}</p>)
+      result << %(<p>#{collapse_cjk_newlines(item.text)}</p>)
       result << item.content if item.blocks?
       result << '</li>'
     end
@@ -670,6 +673,7 @@ Your browser does not support the audio tag.
   end
 
   def convert_paragraph node
+    content = collapse_cjk_newlines(node.content)
     if node.title?
       if node.role
         attributes = %(#{node.id ? %[ id="#{node.id}"] : ''} class="paragraph #{node.role}")
@@ -680,7 +684,7 @@ Your browser does not support the audio tag.
       end
       %(<div#{attributes}>
 <div class="title">#{node.title}</div>
-<p>#{node.content}</p>
+<p>#{content}</p>
 </div>)
     else
       if node.role
@@ -690,7 +694,7 @@ Your browser does not support the audio tag.
       else
         attributes = ''
       end
-      %(<p#{attributes}>#{node.content}</p>)
+      %(<p#{attributes}>#{content}</p>)
     end
   end
 
@@ -758,6 +762,7 @@ Your browser does not support the audio tag.
     end
     class_attribute = %( class="#{classes.join ' '}")
 
+    result << '<div class="table-wrapper">'
     result << %(<table#{id_attribute}#{class_attribute}#{style_attribute}>)
     result << %(<caption class="title">#{node.captioned_title}</caption>) if node.title?
     if (node.attr 'rowcount') > 0
@@ -803,6 +808,7 @@ Your browser does not support the audio tag.
       end
     end
     result << '</table>'
+    result << '</div>'
     result.join Asciidoctor::LF
   end
 
@@ -840,9 +846,9 @@ Your browser does not support the audio tag.
         result << '<li>'
       end
       if checklist && (item.attr? 'checkbox')
-        result << %(<p>#{(item.attr? 'checked') ? marker_checked : marker_unchecked}#{item.text}</p>)
+        result << %(<p>#{(item.attr? 'checked') ? marker_checked : marker_unchecked}#{collapse_cjk_newlines(item.text)}</p>)
       else
-        result << %(<p>#{item.text}</p>)
+        result << %(<p>#{collapse_cjk_newlines(item.text)}</p>)
       end
       result << item.content if item.blocks?
       result << '</li>'
@@ -1048,6 +1054,23 @@ Your browser does not support the audio tag.
   end
 
   private
+
+  def collapse_cjk_newlines text
+    c = CJK_RE
+    # CJK char/punct, newline, CJK char/punct
+    text = text.gsub(/(#{c})\s*\n\s*(#{c})/, '\1\2')
+    # closing tag after CJK, newline, CJK char/punct
+    text = text.gsub(/(#{c}<\/[a-z]+>)\s*\n\s*(#{c})/i, '\1\2')
+    # CJK char/punct, newline, opening tag before CJK
+    text = text.gsub(/(#{c})\s*\n\s*(<[a-z][^>]*>#{c})/i, '\1\2')
+    # closing tag after CJK, newline, opening tag before CJK
+    text = text.gsub(/(#{c}<\/[a-z]+>)\s*\n\s*(<[a-z][^>]*>#{c})/i, '\1\2')
+    # CJK char/punct, newline, opening tag (even if tag content is non-CJK)
+    text = text.gsub(/(#{c})\s*\n\s*(<[a-z][^>]*>)/i, '\1\2')
+    # closing tag, newline, CJK char/punct (even if tag content was non-CJK)
+    text = text.gsub(/(<\/[a-z]+>)\s*\n\s*(#{c})/i, '\1\2')
+    text
+  end
 
   def append_boolean_attribute name, xml
     xml ? %( #{name}="#{name}") : %( #{name})
