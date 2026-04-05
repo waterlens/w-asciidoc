@@ -1,10 +1,7 @@
 class HighlightJsAdapter < Asciidoctor::SyntaxHighlighter::Base
     register_for 'highlightjs', 'highlight.js'
 
-    # REMIND: we cannot use Highlight.js 11+ because unescaped HTML support has been removed:
-    # https://github.com/highlightjs/highlight.js/issues/2889
-    # We are using unescaped HTML in source blocks for callout.
-    HIGHLIGHT_JS_VERSION = '10.7.3'
+    HIGHLIGHT_JS_VERSION = '11.11.1'
 
     def initialize *args
       super
@@ -34,6 +31,7 @@ class HighlightJsAdapter < Asciidoctor::SyntaxHighlighter::Base
 <script src="#{base_url}/highlight.min.js"></script>
 #{(doc.attr? 'highlightjs-languages') ? ((doc.attr 'highlightjs-languages').split ',').map {|lang| %[<script src="#{base_url}/languages/#{lang.lstrip}.min.js"></script>\n] }.join : ''}
 <script>
+hljs.configure({ignoreUnescapedHTML: true});
 hljs.highlightAll();
 </script>)
     end
